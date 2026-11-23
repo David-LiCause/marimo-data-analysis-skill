@@ -15,12 +15,14 @@ Use this skill when the user asks a data question that should end up as a reprod
 
 ## marimo pair (required)
 Invoke the `marimo-pair:marimo-pair` skill with the Skill tool before touching the notebook, and follow it. Do not build the notebook by writing the `.py` file. In short:
-- **Start:** copy the template to create the file, then run `marimo edit analysis_<topic>.py --no-token` with the project's runner (e.g. `uv run`). Do not use `--headless`. Add `--sandbox` only if the file has a PEP 723 header. The notebook must be open in the user's browser before code can run in it.
+- **Start:** run `discover-servers.sh` first and reuse a server already running. Otherwise copy the template to create the file (in the project's notebooks folder if it has one), then run `marimo edit analysis_<topic>.py --no-token`. Run it in the background. Do not use `--headless`: marimo opens the browser itself unless that flag is set.
+- **Which marimo:** if the project has `pyproject.toml` with marimo as a dependency, use its runner (e.g. `uv run`). If not, use `uvx marimo@latest edit … --sandbox`. Add `--sandbox` whenever the file has a PEP 723 header. marimo must be 0.21.1 or newer, and `jq` and `curl` must be on PATH.
+- **Session:** code can only run while the notebook is open in a browser. After starting, confirm a session exists (`discover-servers.sh`, then a trivial `execute-code.sh` call). If there is none within a few seconds, open the server URL yourself (`open <url>` on macOS, `xdg-open` on Linux) and check again. Ask the user to open it only if that still fails. Leave the tab open. If several notebooks are open, pass `--file <notebook path>` to `execute-code.sh`.
 - **First command:** run `help(cm)` through `execute-code.sh` and wait for it to succeed before any other `cm` call.
-- **Prototype** in the scratchpad (its top-level variables are discarded after each call). **Persist** with `ctx.create_cell`, `ctx.edit_cell`, and `ctx.run_cell` inside `cm.get_context()`; these take cell bodies, not `@app.cell` wrappers.
-- **Never** use Edit, Write, or NotebookEdit on the notebook file while the session is live. Read a cell's current code before replacing it. Add packages with `ctx.packages.add()`, not `uv` or `pip`.
+- **Prototype** in the scratchpad (its top-level variables are discarded after each call). **Persist** with `ctx.create_cell`, `ctx.edit_cell`, and `ctx.run_cell` inside `cm.get_context()`; these take cell bodies, not `@app.cell` wrappers. `create_cell` and `edit_cell` only check structure, so after `run_cell` read `ctx.cells[...].status` and `.errors` to confirm the cell actually ran.
+- **Never** use Edit, Write, or NotebookEdit on the notebook file while the session is live. Read a cell's current code before replacing it. Add packages with `ctx.packages.add()`, not `uv` or `pip`; install what the connection needs (e.g. `pyarrow`, `db-dtypes`) up front. If polars `to_pandas()` still fails after a mid-session install, see marimo-pair's `reference/gotchas.md` for the pyarrow workaround.
 - **Visibility:** `create_cell` hides code by default. Pass `hide_code=False` for every cell except the markdown cells and the Section 3 code cells, matching the template.
-- Each public name is defined in one cell only; reuse existing imports. `marimo._code_mode` is for the scratchpad only, never in notebook cells.
+- Each public name is defined in one cell only; reuse existing imports. Names starting with `_` are private to their cell, so anything a later cell needs must be public. `marimo._code_mode` is for the scratchpad only, never in notebook cells.
 
 ## Step 1: Scope the question (with the user)
 Restate the question: metric, population, time window, segments. Ask about anything ambiguous, then get the user to confirm the scope before moving on.
@@ -32,7 +34,7 @@ Find the data sources available (existing notebook connections, env vars, config
 Metadata only: use the catalog, schema listing, or `INFORMATION_SCHEMA`, plus any reference files (approved sources, metric definitions). For each candidate note its grain, relevance, and known caveats. Prefer approved sources, the grain the question needs, the most complete date coverage, and the fewest joins.
 
 ## Step 4: Confirm tables (with the user)
-Present the recommended tables and why, the close alternatives rejected and why, and the join keys. Wait for the user to confirm or change the selection. Do not pull data or start the analysis before this. Once confirmed, start the notebook as described under marimo pair and ask the user to open it in their browser, then continue on your own.
+Present the recommended tables and why, the close alternatives rejected and why, and the join keys. Wait for the user to confirm or change the selection. Do not pull data or start the analysis before this. Once confirmed, start the notebook and get a live session as described under marimo pair, without asking the user to open it, then continue on your own.
 
 ## Step 5: Profile the confirmed tables
 For each table, in the marimo pair scratchpad: row count, date range vs. the requested window, null rates of used columns, key uniqueness at the stated grain, join match rates and fan-out, and reconciliation to a known baseline if one exists. Classify each check as OK, FLAG, or BLOCKER and record it in the Section 1 check table.
@@ -57,7 +59,7 @@ Style:
 - Use descriptive names. Keep expensive loads in their own cells. Parameters live in one cell.
 - The notebook must run top to bottom with no manual steps. Record assumptions in the notebook, not only in chat.
 - Replace every `<placeholder>`; none may remain.
-- Run `marimo check` and run the notebook top to bottom before moving on.
+- Before moving on, run `marimo check` on the file (read-only) and confirm through marimo pair that no cell has errors.
 
 ## Step 7: Sanity check
 Record every check in the Section 3 table:
