@@ -9,10 +9,15 @@ runs a data analysis unattended in a marimo notebook via `marimo-pair`.
 Everything the skill ships is in `skill/`; the rest of the repo is this README and a Makefile.
 
 - `skill/SKILL.md` – the skill. It points to the template notebook below.
-- `skill/notebooks/analysis_template.py` – the blank starting point and the only copy of the
+- `skill/templates/analysis_template.py` – the blank starting point and the only copy of the
   template. Copy it to `analysis_<topic>.py`, replace every `<placeholder>`, wire up `run_query`,
   and fill in the two check tables.
-- `skill/notebooks/analysis_example_revenue_change.py` – a finished analysis: *how did completed-order
+- `skill/templates/analysis_summary_template.py` – the blank starting point for the short summary
+  notebook built at the end (Step 8). Copy it to `analysis_<topic>_summary.py` and fill it in.
+- `skill/examples/analysis_summary_example_revenue_change.py` – the summary of the example analysis
+  below: the answer, one chart and table, key points, and caveats, with all code hidden. Like the
+  analysis example, it reads a DuckDB database that is not included.
+- `skill/examples/analysis_example_revenue_change.py` – a finished analysis: *how did completed-order
   revenue change in Q3 2025 vs Q2 2025, and which regions drove it?* Every placeholder is filled in.
   It reads a DuckDB database that is not included, so treat it as a reference for the finished shape
   of an analysis rather than something to run.

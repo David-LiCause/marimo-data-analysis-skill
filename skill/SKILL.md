@@ -8,7 +8,7 @@ description: "Run a data analysis or answer a data question in a marimo notebook
 Use this skill when the user asks a data question that should end up as a reproducible marimo notebook.
 
 ## Rules
-- Steps 1-4 are interactive. Steps 5-8 run on their own, without asking questions.
+- Steps 1-4 are interactive. Steps 5-10 run on their own, without asking questions.
 - Read-only. Never modify, delete, or write to source data.
 - Never present a number that has not passed the Step 7 checks.
 - All notebook work goes through marimo pair (next section).
@@ -46,7 +46,7 @@ For each table, in the marimo pair scratchpad: row count, date range vs. the req
 Decisions from here on are made without asking: pick the most defensible option, record it in the notebook, and list anything the user should decide under "Caveats and open questions".
 
 ## Step 6: Build the notebook
-The notebook starts as a copy of `notebooks/analysis_template.py` (in this skill's directory). Through marimo pair, edit its cells to replace every `<placeholder>`, wire up `run_query`, and fill the check tables, and add the analysis cells. Prototype in the scratchpad and commit only validated cells. Four sections, in order:
+The notebook starts as a copy of `templates/analysis_template.py` (in this skill's directory). Through marimo pair, edit its cells to replace every `<placeholder>`, wire up `run_query`, and fill the check tables, and add the analysis cells. Prototype in the scratchpad and commit only validated cells. Four sections, in order:
 1. **Data sources and assumptions checked:** paragraph, flags list, check table.
 2. **Analysis:** cells, each with a short description above it.
 3. **Sanity checks:** paragraph, flags list, check table.
@@ -70,10 +70,27 @@ Record every check in the Section 3 table:
 
 If a check fails, investigate and fix once. If it still fails, mark it FLAG (usable with the caveat stated) or BLOCKER, and handle as in Step 5.
 
-## Step 8: Report
+## Step 8: Summary notebook
+Skip this if the Status is Blocked. Otherwise build a short, readable version of the analysis as `analysis_<topic>_summary.py`, next to the analysis notebook. Start from a copy of `templates/analysis_summary_template.py` (in this skill's directory), start it and build it through marimo pair as in the marimo pair section.
+
+Go through the analysis notebook and keep only what a reader needs to understand and trust the answer:
+- **Keep:** the title and answer, the metric definition, time window and population, the cells that produce the final tables and charts (with the connection, parameters and queries they depend on, so it still runs top to bottom), and any flag that materially changes how the answer should be read.
+- **Drop:** profiling, check tables, intermediate steps, alternative definitions that did not change the answer, and anything that only supports QA.
+- **Order:** a title that states the answer (no paragraph under it), then the key results (a chart or small table each), then key points, then caveats. Add one line saying which checks passed, and link to the full analysis notebook for the detail.
+- **Style:** hide the code of every cell (`hide_code=True`) so it reads as a report, format numbers for reading (thousands separators, percentages, units), and use plain language. Every number must match the analysis notebook; do not introduce new ones.
+- Check it as in Step 6: `marimo check`, and no cell errors.
+
+## Step 9: Render to PDF
+Render each notebook you built (the analysis notebook, and the summary notebook if one exists) to a PDF next to its `.py` file:
+
+```bash
+uv run marimo export pdf <notebook>.py -o <notebook>.pdf -f
+```
+
+## Step 10: Report
 Set the notebook Status to Complete, Complete with flags, or Blocked. Reply briefly with:
 1. **Status** and **answer**: key number(s) in 1-3 sentences (or why no answer is given).
 2. **Flags and caveats** that materially affect the answer.
 3. **Checks**: what was verified, and anything not verified.
-4. **Notebook**: the file path.
+4. **Notebooks**: the file paths of the notebooks and their PDFs.
 5. **Decisions made on your behalf** and **open questions**, if any.
