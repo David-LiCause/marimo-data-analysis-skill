@@ -18,8 +18,8 @@ def _(mo):
     # <Title: the question in one line>
 
     **Status:** <Complete | Complete with flags | Blocked>
-    **Question as interpreted:** <metric, population, time window, segments>
-    **Interpretation notes:** <ambiguities that were resolved, and how. Write "None" if there were none.>
+
+    <Short description: the question as interpreted, and any ambiguity resolved along the way.>
     """)
     return
 
@@ -133,7 +133,7 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(pd, results, run_query):
     # One row per check. status is OK, FLAG, or BLOCKER.
     # Example row:

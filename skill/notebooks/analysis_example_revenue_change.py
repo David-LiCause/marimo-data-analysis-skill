@@ -21,9 +21,7 @@ def _(mo):
 
     **Status:** Complete with flags
 
-    **Question as interpreted:** Revenue from completed orders (cancelled and refunded orders excluded), all customers, order dates 2025-07-01 to 2025-09-30 compared with the previous quarter, 2025-04-01 to 2025-06-30, broken down by customer region.
-
-    **Interpretation notes:** "Revenue" is ambiguous. The headline uses completed orders only. Gross booked revenue (completed plus refunded orders, before refunds are netted off) is cheap to compute, so it is shown alongside. "Previous period" is the calendar quarter immediately before the window.
+    Revenue from completed orders (cancelled and refunded orders excluded) for all customers, comparing 2025-07-01 to 2025-09-30 with the previous quarter, 2025-04-01 to 2025-06-30, by customer region. "Revenue" is ambiguous, so the headline uses completed orders only, with gross booked revenue (completed plus refunded orders, before refunds are netted off) shown alongside. "Previous period" is the calendar quarter immediately before the window.
     """)
     return
 
@@ -551,7 +549,7 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(PARAMS, pd, run_query):
     _raw_orders = run_query(f"""
         -- Purpose: raw order rows for both quarters, undeduplicated, for the pandas recompute.
@@ -590,7 +588,7 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(results):
     _flagged = results[(results["region"] != "Total") & results["beyond_threshold"]].copy()
     _flagged["orders_pct_change"] = _flagged["current_orders"] / _flagged["prior_orders"] - 1
@@ -604,7 +602,7 @@ def _(results):
     return (flagged_regions,)
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(PARAMS, flagged_regions, headline, pd, recomputed, recomputed_date_range, results):
     # One row per check. status is OK, FLAG, or BLOCKER.
     _by_period = recomputed.groupby("period")["revenue"].sum()
