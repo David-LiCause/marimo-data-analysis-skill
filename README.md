@@ -6,13 +6,15 @@ conventions.
 
 ## Layout
 
-- `SKILL.md` – the skill, unmodified. Its "Template notebook" section is the source of the template.
-- `notebooks/analysis_template.py` – the blank starting point, byte-identical to the code block in
-  `SKILL.md` (a test enforces this). Copy it to `analysis_<topic>.py`, replace every `<placeholder>`,
+Everything the skill ships is in `skill/`; the rest of the repo is documentation, tests and tooling.
+
+- `skill/SKILL.md` – the skill, unmodified. Its "Template notebook" section is the source of the template.
+- `skill/notebooks/analysis_template.py` – the blank starting point, byte-identical to the code block in
+  `skill/SKILL.md` (a test enforces this). Copy it to `analysis_<topic>.py`, replace every `<placeholder>`,
   wire up `run_query`, and fill in the two check tables.
-- `notebooks/analysis_example_revenue_change.py` – a finished analysis: *how did completed-order
+- `skill/notebooks/analysis_example_revenue_change.py` – a finished analysis: *how did completed-order
   revenue change in Q3 2025 vs Q2 2025, and which regions drove it?* Every placeholder is filled in.
-- `scripts/seed_example_db.py` – builds `data/example.duckdb`, the synthetic database the example
+- `skill/scripts/seed_example_db.py` – builds `skill/data/example.duckdb`, the synthetic database the example
   reads. Deterministic, safe to re-run. `data/` is git-ignored.
 - `tests/` – smoke tests (template matches `SKILL.md`, example runs with no blockers).
 
@@ -20,15 +22,15 @@ conventions.
 
 ```bash
 uv sync
-uv run python scripts/seed_example_db.py
-uv run marimo edit notebooks/analysis_example_revenue_change.py
+uv run python skill/scripts/seed_example_db.py
+uv run marimo edit skill/notebooks/analysis_example_revenue_change.py
 ```
 
 Checks, as the skill requires before moving on:
 
 ```bash
-uv run marimo check notebooks
-uv run python notebooks/analysis_example_revenue_change.py   # runs top to bottom headless
+uv run marimo check skill/notebooks
+uv run python skill/notebooks/analysis_example_revenue_change.py   # runs top to bottom headless
 uv run pytest && uv run ruff check .
 ```
 

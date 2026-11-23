@@ -9,8 +9,9 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parent.parent
-TEMPLATE = ROOT / "notebooks" / "analysis_template.py"
-EXAMPLE = ROOT / "notebooks" / "analysis_example_revenue_change.py"
+SKILL = ROOT / "skill"
+TEMPLATE = SKILL / "notebooks" / "analysis_template.py"
+EXAMPLE = SKILL / "notebooks" / "analysis_example_revenue_change.py"
 SECTIONS = [
     "## 1. Data sources and assumptions checked",
     "## 2. Analysis",
@@ -20,7 +21,7 @@ SECTIONS = [
 
 
 def test_template_matches_skill_md() -> None:
-    skill = (ROOT / "SKILL.md").read_text()
+    skill = (SKILL / "SKILL.md").read_text()
     block = re.search(r"## Template notebook.*?```python\n(.*?)\n```", skill, re.DOTALL)
     assert block is not None
     assert TEMPLATE.read_text() == block.group(1) + "\n"
@@ -43,7 +44,7 @@ def test_example_has_no_placeholders_left() -> None:
 @pytest.fixture(scope="module")
 def example_defs() -> dict:
     subprocess.run(
-        [sys.executable, str(ROOT / "scripts" / "seed_example_db.py")], check=True, cwd=ROOT
+        [sys.executable, str(SKILL / "scripts" / "seed_example_db.py")], check=True, cwd=ROOT
     )
     spec = importlib.util.spec_from_file_location("example_notebook", EXAMPLE)
     assert spec is not None and spec.loader is not None
