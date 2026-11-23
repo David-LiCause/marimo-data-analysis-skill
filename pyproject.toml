@@ -1,0 +1,33 @@
+[project]
+name = "marimo-data-analysis-skill"
+version = "0.1.0"
+description = "marimo-data-analysis Claude skill, plus a starter notebook template and a worked example."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "marimo",
+    "altair",
+    "duckdb",
+    "pandas",
+    "pyarrow",
+]
+
+[dependency-groups]
+dev = ["pytest", "ruff"]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint.per-file-ignores]
+# marimo cells end with a bare `return` and use bare expressions as their output
+"notebooks/*" = ["F541", "B018", "PLR1711", "ISC004"]
+
+[tool.ruff.format]
+# Keep the template byte-identical to the code block in SKILL.md
+exclude = ["SKILL.md", "notebooks/analysis_template.py"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
