@@ -10,8 +10,8 @@ Everything the skill ships is in `skill/`; the rest of the repo is this README a
 
 - `skill/SKILL.md` – the skill. Its "Template notebook" section is the source of the template.
 - `skill/notebooks/analysis_template.py` – the blank starting point, a copy of the code block in
-  `skill/SKILL.md`. Keep the two in sync by hand. Copy it to `analysis_<topic>.py`, replace every `<placeholder>`, wire up
-  `run_query`, and fill in the two check tables.
+  `skill/SKILL.md`. Keep the two in sync by hand. Copy it to `analysis_<topic>.py`, replace every
+  `<placeholder>`, wire up `run_query`, and fill in the two check tables.
 - `skill/notebooks/analysis_example_revenue_change.py` – a finished analysis: *how did completed-order
   revenue change in Q3 2025 vs Q2 2025, and which regions drove it?* Every placeholder is filled in.
   It reads a DuckDB database that is not included, so treat it as a reference for the finished shape
