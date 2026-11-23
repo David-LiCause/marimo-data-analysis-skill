@@ -20,11 +20,11 @@ Everything for one analysis goes in one folder, `analysis_<name>/` (`<name>` is 
 analysis_<name>/
 ├── analysis_<name>.py
 ├── analysis_<name>_summary.py
-├── analysis_<name>.pdf
-└── analysis_<name>_summary.pdf
+├── analysis_<name>.html
+└── analysis_<name>_summary.html
 ```
 
-Both PDFs are rendered from the notebooks with all cell outputs (tables and charts) included. If the Status is Blocked, the folder holds only the analysis notebook and its PDF.
+Both HTML files are rendered from the notebooks with all cell outputs (tables and charts) included and the code left out. If the Status is Blocked, the folder holds only the analysis notebook and its HTML.
 
 ## marimo pair (required)
 Invoke the `marimo-pair:marimo-pair` skill with the Skill tool before touching the notebook, and follow it. Do not build the notebook by writing the `.py` file. In short:
@@ -93,12 +93,14 @@ Go through the analysis notebook and keep only what a reader needs to understand
 - **Style:** hide the code of every cell (`hide_code=True`) so it reads as a report, format numbers for reading (thousands separators, percentages, units), and use plain language. Every number must match the analysis notebook; do not introduce new ones.
 - Check it as in Step 6: `marimo check`, and no cell errors.
 
-## Step 9: Render to PDF
-Render each notebook you built (the analysis notebook, and the summary notebook if one exists) to a PDF in the same folder, with cell outputs included:
+## Step 9: Render to HTML
+Render each notebook you built (the analysis notebook, and the summary notebook if one exists) to an HTML file in the same folder. The export runs the notebook and includes every cell's output (tables, charts, text), and wide tables scroll sideways. `--no-include-code` leaves the source and SQL out, and `PYTHONWARNINGS=ignore` keeps Python warnings (for example Google auth or BigQuery library warnings) out of the file:
 
 ```bash
-uv run marimo export pdf <notebook>.py -o <notebook>.pdf -f
+PYTHONWARNINGS=ignore uv run marimo export html <notebook>.py -o <notebook>.html --no-include-code -f
 ```
+
+The HTML must never show warnings, tracebacks, or file paths. If it does, fix the cause in the notebook and render again. Open each file and confirm the tables and charts are there before reporting.
 
 ## Step 10: Report
 Set the notebook Status to Complete, Complete with flags, or Blocked. Reply briefly with:

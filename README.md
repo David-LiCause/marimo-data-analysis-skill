@@ -17,7 +17,7 @@ summary written for non-technical readers.
 | 6. Build | Build the analysis notebook from the template: sources and checks, analysis, sanity checks, findings | Claude, unattended |
 | 7. Sanity check | Recompute the key result a second way, compare to the prior period, and check units and totals | Claude, unattended |
 | 8. Summary | Build a short summary notebook with only what is needed to understand the answer (skipped if blocked) | Claude, unattended |
-| 9. Render | Export the notebooks to PDF with cell outputs | Claude, unattended |
+| 9. Render | Export the notebooks to HTML with cell outputs, without code | Claude, unattended |
 | 10. Report | Reply with status, answer, caveats, checks, and the output folder | Claude, unattended |
 
 Steps 1 to 4 are interactive. After you approve the tables, steps 5 to 10 run without questions, and
@@ -32,8 +32,8 @@ Each analysis produces one folder:
 analysis_<name>/
 ├── analysis_<name>.py            full notebook: sources, checks, analysis, findings
 ├── analysis_<name>_summary.py    short notebook for readers: answer, key results, caveats
-├── analysis_<name>.pdf           rendered with cell outputs
-└── analysis_<name>_summary.pdf   rendered with cell outputs
+├── analysis_<name>.html          rendered with cell outputs, no code
+└── analysis_<name>_summary.html  rendered with cell outputs, no code
 ```
 
 ## Requirements
