@@ -48,7 +48,8 @@ def _(duckdb, mo, pd):
     _db_path = mo.notebook_dir().parent / "data" / "example.duckdb"
     if not _db_path.exists():
         raise FileNotFoundError(
-            f"{_db_path} not found. Build it first: uv run python scripts/seed_example_db.py"
+            f"{_db_path} not found. This example is a reference for the finished shape of an "
+            "analysis; point this cell at your own database to run it."
         )
     _connection = duckdb.connect(str(_db_path), read_only=True)
 

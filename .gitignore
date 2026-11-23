@@ -1,3 +1,2 @@
-data/
-exports/
 .venv/
+__pycache__/

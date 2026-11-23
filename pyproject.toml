@@ -13,7 +13,7 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = ["pytest", "ruff"]
+dev = ["ruff"]
 
 [tool.uv]
 package = false
@@ -28,6 +28,3 @@ line-length = 100
 [tool.ruff.format]
 # Keep the template byte-identical to the code block in SKILL.md
 exclude = ["skill/SKILL.md", "skill/notebooks/analysis_template.py"]
-
-[tool.pytest.ini_options]
-testpaths = ["tests"]
