@@ -6,7 +6,7 @@ conventions.
 
 ## Layout
 
-Everything the skill ships is in `skill/`; the rest of the repo is documentation and tooling.
+Everything the skill ships is in `skill/`; the rest of the repo is documentation and a Makefile.
 
 - `skill/SKILL.md` – the skill, unmodified. Its "Template notebook" section is the source of the template.
 - `skill/notebooks/analysis_template.py` – the blank starting point, identical to the code block in
@@ -17,13 +17,9 @@ Everything the skill ships is in `skill/`; the rest of the repo is documentation
   It reads a DuckDB database that is not included, so treat it as a reference for the finished shape
   of an analysis rather than something to run.
 
-## Checks
+## Local testing
 
-```bash
-uv sync
-uv run marimo check skill/notebooks
-uv run ruff check .
-```
+`make install` copies `skill/` to `~/.claude/skills/marimo-data-analysis/`. Restart Claude Code to pick it up.
 
 ## What the example demonstrates
 
@@ -43,5 +39,3 @@ before refunds) and shows both, as Step 1 asks when two interpretations are chea
 
 - Prose in the example notebook is written out, not generated, so the numbers quoted in the text
   belong to the data it was written against.
-- This project follows the `marimo-sandbox` conventions (`uv`, `package = false`). The skill asks for
-  SQL comments for review, so, unlike `marimo-sandbox`, the notebooks use them.
