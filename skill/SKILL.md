@@ -13,9 +13,22 @@ Use this skill when the user asks a data question that should end up as a reprod
 - Never present a number that has not passed the Step 7 checks.
 - All notebook work goes through marimo pair (next section).
 
+## Output
+Everything for one analysis goes in one folder, `analysis_<name>/` (`<name>` is a short snake_case topic), created in the project's notebooks folder if it has one:
+
+```
+analysis_<name>/
+├── analysis_<name>.py
+├── analysis_<name>_summary.py
+├── analysis_<name>.pdf
+└── analysis_<name>_summary.pdf
+```
+
+Both PDFs are rendered from the notebooks with all cell outputs (tables and charts) included. If the Status is Blocked, the folder holds only the analysis notebook and its PDF.
+
 ## marimo pair (required)
 Invoke the `marimo-pair:marimo-pair` skill with the Skill tool before touching the notebook, and follow it. Do not build the notebook by writing the `.py` file. In short:
-- **Start:** run `discover-servers.sh` first and reuse a server already running. Otherwise copy the template to create the file (in the project's notebooks folder if it has one), then run `marimo edit analysis_<topic>.py --no-token`. Run it in the background. Do not use `--headless`: marimo opens the browser itself unless that flag is set.
+- **Start:** run `discover-servers.sh` first and reuse a server already running. Otherwise copy the template to `analysis_<name>/analysis_<name>.py` (see Output), then run `marimo edit` on that file with `--no-token`. Run it in the background. Do not use `--headless`: marimo opens the browser itself unless that flag is set.
 - **Which marimo:** if the project has `pyproject.toml` with marimo as a dependency, use its runner (e.g. `uv run`). If not, use `uvx marimo@latest edit … --sandbox`. Add `--sandbox` whenever the file has a PEP 723 header. marimo must be 0.21.1 or newer, and `jq` and `curl` must be on PATH.
 - **Session:** code can only run while the notebook is open in a browser. After starting, confirm a session exists (`discover-servers.sh`, then a trivial `execute-code.sh` call). If there is none within a few seconds, open the server URL yourself (`open <url>` on macOS, `xdg-open` on Linux) and check again. Ask the user to open it only if that still fails. Leave the tab open. If several notebooks are open, pass `--file <notebook path>` to `execute-code.sh`.
 - **First command:** run `help(cm)` through `execute-code.sh` and wait for it to succeed before any other `cm` call.
@@ -71,7 +84,7 @@ Record every check in the Section 3 table:
 If a check fails, investigate and fix once. If it still fails, mark it FLAG (usable with the caveat stated) or BLOCKER, and handle as in Step 5.
 
 ## Step 8: Summary notebook
-Skip this if the Status is Blocked. Otherwise build a short, readable version of the analysis as `analysis_<topic>_summary.py`, next to the analysis notebook. Start from a copy of `templates/analysis_summary_template.py` (in this skill's directory), start it and build it through marimo pair as in the marimo pair section.
+Skip this if the Status is Blocked. Otherwise build a short, readable version of the analysis as `analysis_<name>/analysis_<name>_summary.py`. Start from a copy of `templates/analysis_summary_template.py` (in this skill's directory), start it and build it through marimo pair as in the marimo pair section.
 
 Go through the analysis notebook and keep only what a reader needs to understand and trust the answer:
 - **Keep:** the title and answer, the metric definition, time window and population, the cells that produce the final tables and charts (with the connection, parameters and queries they depend on, so it still runs top to bottom), and any flag that materially changes how the answer should be read.
@@ -81,7 +94,7 @@ Go through the analysis notebook and keep only what a reader needs to understand
 - Check it as in Step 6: `marimo check`, and no cell errors.
 
 ## Step 9: Render to PDF
-Render each notebook you built (the analysis notebook, and the summary notebook if one exists) to a PDF next to its `.py` file:
+Render each notebook you built (the analysis notebook, and the summary notebook if one exists) to a PDF in the same folder, with cell outputs included:
 
 ```bash
 uv run marimo export pdf <notebook>.py -o <notebook>.pdf -f
@@ -92,5 +105,5 @@ Set the notebook Status to Complete, Complete with flags, or Blocked. Reply brie
 1. **Status** and **answer**: key number(s) in 1-3 sentences (or why no answer is given).
 2. **Flags and caveats** that materially affect the answer.
 3. **Checks**: what was verified, and anything not verified.
-4. **Notebooks**: the file paths of the notebooks and their PDFs.
+4. **Output**: the `analysis_<name>/` folder path.
 5. **Decisions made on your behalf** and **open questions**, if any.

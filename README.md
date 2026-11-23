@@ -1,51 +1,68 @@
 # marimo-data-analysis-skill
 
-The `marimo-data-analysis` Claude skill, plus the notebooks it describes: a blank template to start
-every analysis from, and a complete worked example that follows the skill's conventions. The skill
-runs a data analysis unattended in a marimo notebook via `marimo-pair`.
+A [Claude Code](https://claude.com/claude-code) skill that turns a data question into a reproducible,
+reviewed analysis. You describe the question and approve the data sources. Claude then builds the
+analysis in a [marimo](https://marimo.io) notebook, checks its own work, and hands back a short
+summary written for non-technical readers.
 
-## Layout
+## Steps in prescriptive workflow
 
-Everything the skill ships is in `skill/`; the rest of the repo is this README and a Makefile.
+| Step | What happens | Who |
+| ---- | ------------ | --- |
+| 1. Scope | Restate the question (metric, population, time window, segments) and confirm it | You and Claude |
+| 2. Test connections | Run a trivial read-only query against each candidate data source | Claude |
+| 3. Find tables | Review table metadata only (grain, relevance, caveats); no data is pulled | Claude |
+| 4. Confirm tables | Claude proposes tables, rejected alternatives, and join keys; you approve | You and Claude |
+| 5. Profile | Check row counts, date coverage, nulls, key uniqueness, join fan-out, and reconciliation to a baseline. Each check is rated OK, FLAG (handled and documented), or BLOCKER | Claude, unattended |
+| 6. Build | Build the analysis notebook from the template: sources and checks, analysis, sanity checks, findings | Claude, unattended |
+| 7. Sanity check | Recompute the key result a second way, compare to the prior period, and check units and totals | Claude, unattended |
+| 8. Summary | Build a short summary notebook with only what is needed to understand the answer (skipped if blocked) | Claude, unattended |
+| 9. Render | Export the notebooks to PDF with cell outputs | Claude, unattended |
+| 10. Report | Reply with status, answer, caveats, checks, and the output folder | Claude, unattended |
 
-- `skill/SKILL.md` – the skill. It points to the template notebook below.
-- `skill/templates/analysis_template.py` – the blank starting point and the only copy of the
-  template. Copy it to `analysis_<topic>.py`, replace every `<placeholder>`, wire up `run_query`,
-  and fill in the two check tables.
-- `skill/templates/analysis_summary_template.py` – the blank starting point for the short summary
-  notebook built at the end (Step 8). Copy it to `analysis_<topic>_summary.py` and fill it in.
-- `skill/examples/analysis_summary_example_revenue_change.py` – the summary of the example analysis
-  below: the answer, one chart and table, key points, and caveats, with all code hidden. Like the
-  analysis example, it reads a DuckDB database that is not included.
-- `skill/examples/analysis_example_revenue_change.py` – a finished analysis: *how did completed-order
-  revenue change in Q3 2025 vs Q2 2025, and which regions drove it?* Every placeholder is filled in.
-  It reads a DuckDB database that is not included, so treat it as a reference for the finished shape
-  of an analysis rather than something to run.
+Steps 1 to 4 are interactive. After you approve the tables, steps 5 to 10 run without questions, and
+decisions are recorded in the notebook. If the data cannot support an answer (a BLOCKER), Claude
+reports no headline number and says what is needed to unblock.
 
-## Local testing
+## Output
+
+Each analysis produces one folder:
+
+```
+analysis_<name>/
+├── analysis_<name>.py            full notebook: sources, checks, analysis, findings
+├── analysis_<name>_summary.py    short notebook for readers: answer, key results, caveats
+├── analysis_<name>.pdf           rendered with cell outputs
+└── analysis_<name>_summary.pdf   rendered with cell outputs
+```
+
+## Requirements
+
+- Claude Code with the [`marimo-pair`](https://github.com/marimo-team/marimo-pair) plugin. The
+  skill uses it to work inside a live notebook. Install it with
+  `claude plugin marketplace add marimo-team/marimo-pair` and then
+  `claude plugin install marimo-pair@marimo-pair`.
+- [`uv`](https://docs.astral.sh/uv/), marimo 0.21.1 or newer, and `jq` and `curl` on your PATH.
+- A read-only connection to your data source.
+- A browser. marimo pair only works while the notebook is open in one.
+
+## Install
 
 ```bash
 make install
 ```
 
-Copies `skill/` to `~/.claude/skills/marimo-data-analysis/`, replacing the previous copy. Restart
-Claude Code (or start a new session), then run `/marimo-data-analysis`.
+Copies `skill/` to `~/.claude/skills/marimo-data-analysis/`, replacing the previous copy. Start a
+new Claude Code session, then run `/marimo-data-analysis` with your question.
 
-## What the example demonstrates
+## Repository layout
 
-| Skill step | In the example |
-| ---------- | -------------- |
-| 1. Scope and select tables | Four candidates profiled; `orders_legacy` rejected because it ends before the window; the finance ledger kept as a reconciliation baseline only |
-| 2. Profile sources | Row counts and date coverage, key uniqueness, null rates, join fan-out, ledger reconciliation |
-| 3. Handle problems | FLAGs, not stops: duplicate `order_id` rows (dedupe rule stated and its effect measured), unmatched customers and null regions (kept as "Unknown"), a small ledger gap (inside tolerance) |
-| 4. Build the notebook | Four sections in order, one short paragraph plus flags list per text section, SQL comments for purpose / grain / join logic / filters, parameters in one cell, read-only connection |
-| 5. Sanity check | Independent pandas recompute (total and per region), row counts, date range, prior-period comparison with a 20% threshold, cause analysis for flagged regions |
-| 6. Report | Status "Complete with flags"; the notebook's Section 4 is the written report |
+Everything the skill ships is in `skill/`.
 
-The example also computes both plausible definitions of "revenue" (completed only, and gross booked
-before refunds) and shows both, as Step 1 asks when two interpretations are cheap to compute.
-
-## Notes
-
-- Prose in the example notebook is written out, not generated, so the numbers quoted in the text
-  belong to the data it was written against.
+| Path | Purpose |
+| ---- | ------- |
+| `skill/SKILL.md` | The skill: the steps, rules, and output definition |
+| `skill/templates/analysis_template.py` | Blank analysis notebook the skill starts from |
+| `skill/templates/analysis_summary_template.py` | Blank summary notebook |
+| `skill/examples/analysis_example_revenue_change.py` | Finished analysis: how did completed-order revenue change in Q3 2025 vs Q2 2025, and which regions drove it? |
+| `skill/examples/analysis_summary_example_revenue_change.py` | The summary of that analysis |
